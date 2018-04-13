@@ -5,9 +5,11 @@ QT += core
 
 CONFIG += link_pkgconfig
 
-PKGCONFIG += libkcalcoren-qt5 libical
+PKGCONFIG += libcrypto
 
-HEADERS=
+HEADERS=\
+  utils.h
 
 SOURCES= \
-  main.cpp
+  main.cpp \
+  utils.cpp

@@ -22,13 +22,46 @@
  * SOFTWARE.
  */
 
+#include "utils.h"
+
 #include <QTimer>
+#include <stdio.h>
+#include <openssl/pem.h>
+#include <openssl/x509.h>
 #include <QCoreApplication>
 
 int main(int argc, char **argv)
 {
   QCoreApplication app(argc, argv);
   QTimer::singleShot(500, &app, SLOT(quit()));
+
+  FILE *const file = fopen("../data/Geotrust_PCA_G3_Root.pem", "r");
+  if (file) {
+    char *name = NULL;
+    char *header = NULL;
+    unsigned char *data = NULL;
+    long len = 0;
+    int res = PEM_read(file, &name, &header, &data, &len);
+    printf("Reading result: %d\n", res);
+    printf("--- Name: [%s]\n", name);
+    printf("--- Header: [%s]\n", header);
+    printf("--- Data:\n");
+    Utils::hexDump(data, len);
+    printf("*****************************************************************************************************\n");
+    const unsigned char *p = data;
+    X509 *const x509 = d2i_X509(NULL, &p, len);
+    if (x509) {
+      X509_print_fp(stdout, x509);
+    } else {
+      fprintf(stderr, "Error: failed loading certificate\n");
+    }
+
+    /* Clean up */
+    fclose(file);
+  } else {
+    fprintf(stderr, "Error: failed opening the file\n");
+  }
+  printf("*****************************************************************************************************\n");
 
   return app.exec();
 }
